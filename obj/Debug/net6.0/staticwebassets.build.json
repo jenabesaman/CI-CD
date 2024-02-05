@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "AApVOnBPs9TD2ZlJ38BNsSL2mN/g7qhydjICJO/L1Ks=",
+  "Source": "DSTV3.UploadInterface.Api",
+  "BasePath": "_content/DSTV3.UploadInterface.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

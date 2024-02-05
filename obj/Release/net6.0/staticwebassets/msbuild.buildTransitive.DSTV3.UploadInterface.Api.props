@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\buildMultiTargeting\DSTV3.UploadInterface.Api.props" />
+</Project>
