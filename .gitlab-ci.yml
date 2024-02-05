@@ -15,28 +15,26 @@ clone:
 build:
   stage: build
   script:
-    - dotnet restore
-    - dotnet build --configuration Release
+    - dotnet publish -c Release -o ./publish/
+    - rm ./publish/appsettings.json  # Remove the appsettings.json file from the publish directory
+    - cp ./appsettings.json ./publish/  # Copy your own appsettings.json file into the publish directory
+  artifacts:
+    paths:
+      - ./publish/
 
 publish:
   stage: publish
   script:
-    - dotnet publish -c Release -o /home/DSTV3.UploadInterface.Api_pub/
-    - rm /home/DSTV3.UploadInterface.Api_pub/appsettings.json  # Remove the appsettings.json file from the publish directory
-    - cp ./appsettings.json /home/DSTV3.UploadInterface.Api_pub/  # Copy your own appsettings.json file into the publish directory
-  artifacts:
-    paths:
-      - /home/DSTV3.UploadInterface.Api_pub/
+    - docker build -t uploadinterface.Api:v1.0 .
+    - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker push uploadinterface.Api:v1.0
 
 deploy:
   stage: deploy
   script:
-    - docker build -t dstv3.uploadinterface.api:v1.0 .
-    - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker push dstv3.uploadinterface.api:v1.0
     - ssh root@192.168.204.134 'docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY'
-    - ssh root@192.168.204.134 'docker pull dstv3.uploadinterface.api:v1.0'
-    - ssh root@192.168.204.134 'docker stop dstv3.uploadinterface.api || true && docker rm dstv3.uploadinterface.api || true'
-    - ssh root@192.168.204.134 'docker run -d -p 80:80 --name dstv3.uploadinterface.api dstv3.uploadinterface.api:v1.0'
+    - ssh root@192.168.204.134 'docker pull uploadinterface.Api:v1.0'
+    - ssh root@192.168.204.134 'docker stop uploadinterface.Api || true && docker rm uploadinterface.Api || true'
+    - ssh root@192.168.204.134 'docker run -d -p 80:80 --name uploadinterface.Api uploadinterface.Api:v1.0'
   only:
     - master
