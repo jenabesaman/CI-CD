@@ -9,11 +9,15 @@ variables:
 
 clone:
   stage: clone
+  tags: 
+    - DSTV3.Uploadinterface.Api
   script:
     - git clone http://$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD@192.168.204.134:8502/root/dstv3.uploadinterface.api.git
 
 build:
   stage: build
+  tags: 
+    - DSTV3.Uploadinterface.Api
   script:
     - dotnet publish -c Release -o ./publish/
     - rm ./publish/appsettings.json  # Remove the appsettings.json file from the publish directory
@@ -24,6 +28,8 @@ build:
 
 publish:
   stage: publish
+  tags: 
+    - DSTV3.Uploadinterface.Api
   script:
     - docker build -t uploadinterface.Api:v1.0 .
     - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
@@ -31,6 +37,8 @@ publish:
 
 deploy:
   stage: deploy
+  tags: 
+    - DSTV3.Uploadinterface.Api
   script:
     - ssh root@192.168.204.134 'docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY'
     - ssh root@192.168.204.134 'docker pull uploadinterface.Api:v1.0'
