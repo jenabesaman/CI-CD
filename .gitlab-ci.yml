@@ -10,7 +10,7 @@ variables:
 clone:
   stage: clone
   script:
-    - git clone http://tabrizi:glpat-Pe_znfZ4JEboJuNP_zcT@172.16.40.180/tabrizi/test2.git
+    - git clone http://$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD@192.168.204.134:8502/root/test2.git
 
 build:
   stage: build
@@ -25,16 +25,16 @@ build:
 publish:
   stage: publish
   script:
-    - docker build -t uploadinterface.ui:v1.0 .
-    - echo $CI_JOB_TOKEN | docker login -u tabrizi --password-stdin $CI_REGISTRY
-    - docker push uploadinterface.ui:v1.0
+    - docker build -t uploadinterface.Api:v1.0 .
+    - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - docker push uploadinterface.Api:v1.0
 
 deploy:
   stage: deploy
   script:
-    - ssh tabrizi@172.16.40.180 'docker login -u tabrizi -p $CI_JOB_TOKEN $CI_REGISTRY'
-    - ssh tabrizi@172.16.40.180 'docker pull uploadinterface.ui:v1.0'
-    - ssh tabrizi@172.16.40.180 'docker stop uploadinterface.ui || true && docker rm uploadinterface.ui || true'
-    - ssh tabrizi@172.16.40.180 'docker run -d -p 80:80 --name uploadinterface.ui uploadinterface.ui:v1.0'
+    - ssh root@192.168.204.134 'docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY'
+    - ssh root@192.168.204.134 'docker pull uploadinterface.Api:v1.0'
+    - ssh root@192.168.204.134 'docker stop uploadinterface.Api || true && docker rm uploadinterface.Api || true'
+    - ssh root@192.168.204.134 'docker run -d -p 80:80 --name uploadinterface.Api uploadinterface.Api:v1.0'
   only:
     - master
