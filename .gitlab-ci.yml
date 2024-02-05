@@ -1,0 +1,40 @@
+stages:
+  - clone
+  - build
+  - publish
+  - deploy
+
+variables:
+  GIT_STRATEGY: clone  # Ensures a fresh clone on each pipeline run
+
+clone:
+  stage: clone
+  script:
+    - git clone http://tabrizi:glpat-Pe_znfZ4JEboJuNP_zcT@172.16.40.180/tabrizi/test2.git
+
+build:
+  stage: build
+  script:
+    - dotnet publish -c Release -o ./publish/
+    - rm ./publish/appsettings.json  # Remove the appsettings.json file from the publish directory
+    - cp ./appsettings.json ./publish/  # Copy your own appsettings.json file into the publish directory
+  artifacts:
+    paths:
+      - ./publish/
+
+publish:
+  stage: publish
+  script:
+    - docker build -t uploadinterface.ui:v1.0 .
+    - echo $CI_JOB_TOKEN | docker login -u tabrizi --password-stdin $CI_REGISTRY
+    - docker push uploadinterface.ui:v1.0
+
+deploy:
+  stage: deploy
+  script:
+    - ssh tabrizi@172.16.40.180 'docker login -u tabrizi -p $CI_JOB_TOKEN $CI_REGISTRY'
+    - ssh tabrizi@172.16.40.180 'docker pull uploadinterface.ui:v1.0'
+    - ssh tabrizi@172.16.40.180 'docker stop uploadinterface.ui || true && docker rm uploadinterface.ui || true'
+    - ssh tabrizi@172.16.40.180 'docker run -d -p 80:80 --name uploadinterface.ui uploadinterface.ui:v1.0'
+  only:
+    - master
