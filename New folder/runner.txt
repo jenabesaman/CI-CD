@@ -1,0 +1,1 @@
+.\gitlab-runner.exe register  --url http://192.168.204.134:8502  --token glrt-shJQBjxbnbNApYzSx1Ny
