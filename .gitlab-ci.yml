@@ -1,58 +1,13 @@
-image: ubuntu:latest
-
-before_script:
-  - apt-get update
-  - apt-get install openssh-client git-core -y
-  - eval $(ssh-agent -s)
-  - echo "$SSH_DEPLOY_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
-  - mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
-  - ssh-keyscan -H 192.168.204.134 >> ~/.ssh/known_hosts
-
 stages:
-  - clone
   - build
-  - publish
-  - deploy
 
-variables:
-  GIT_STRATEGY: clone  # Ensures a fresh clone on each pipeline run
-
-clone:
-  stage: clone
-  tags: 
-    - DSTV3.Uploadinterface.Api
-  script:
-    - git clone http://$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD@192.168.204.134:8502/root/dstv3.uploadinterface.api.git
-
-build:
+build_job:
   stage: build
-  tags: 
+  tags:
     - DSTV3.Uploadinterface.Api
   script:
-    - dotnet publish -c Release -o ./publish/
-    - rm ./publish/appsettings.json  # Remove the appsettings.json file from the publish directory
-    - cp ./appsettings.json ./publish/  # Copy your own appsettings.json file into the publish directory
-  artifacts:
-    paths:
-      - ./publish/
-
-publish:
-  stage: publish
-  tags: 
-    - DSTV3.Uploadinterface.Api
-  script:
-    - docker build -t uploadinterface.Api:v1.0 .
-    - echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - docker push uploadinterface.Api:v1.0
-
-deploy:
-  stage: deploy
-  tags: 
-    - DSTV3.Uploadinterface.Api
-  script:
-    - ssh root@192.168.204.134 'docker login -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN $CI_REGISTRY'
-    - ssh root@192.168.204.134 'docker pull uploadinterface.Api:v1.0'
-    - ssh root@192.168.204.134 'docker stop uploadinterface.Api || true && docker rm uploadinterface.Api || true'
-    - ssh root@192.168.204.134 'docker run -d -p 80:80 --name uploadinterface.Api uploadinterface.Api:v1.0'
+    - 'dotnet restore'
+    - 'dotnet build --configuration Release'
+    - 'dotnet publish --configuration Release --output /home/DSTV3.UploadInterface.Api_pub/'
   only:
     - master
