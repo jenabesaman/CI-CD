@@ -1,3 +1,13 @@
+image: ubuntu:latest
+
+before_script:
+  - apt-get update
+  - apt-get install openssh-client git-core -y
+  - eval $(ssh-agent -s)
+  - echo "$SSH_DEPLOY_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh && touch ~/.ssh/known_hosts
+  - ssh-keyscan -H 192.168.204.134 >> ~/.ssh/known_hosts
+
 stages:
   - clone
   - build
