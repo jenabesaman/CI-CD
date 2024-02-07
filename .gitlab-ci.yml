@@ -6,6 +6,7 @@ build_job:
   tags:
     - DSTV3.Uploadinterface.Api
   script:
+    - 'git clone http://$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD@192.168.204.134:8505/root/dstv3.uploadinterface.api.git'
     - 'dotnet restore'
     - 'dotnet build --configuration Release'
     - 'dotnet publish --configuration Release --output /home/DSTV3.UploadInterface.Api_pub/'
