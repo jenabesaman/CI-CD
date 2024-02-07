@@ -1,11 +1,10 @@
-stages:
-  - build
-
 build_job:
   stage: build
   tags:
     - DSTV3.Uploadinterface.Api
   script:
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
     - 'git clone http://$CI_REGISTRY_USER:$CI_REGISTRY_PASSWORD@192.168.204.134:8505/root/dstv3.uploadinterface.api.git'
     - 'dotnet restore'
     - 'dotnet build --configuration Release'
